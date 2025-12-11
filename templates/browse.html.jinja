@@ -10,11 +10,11 @@
     <h1 class = "text-center">Browse my products ;)</h1>
         <main class="grid grid-cols-4 gap-3 max-w-4xl mx-auto p-6 mb-5">
             {% for x in products %}
-                <div class = "grid" >
+                <a href= "/product/{{ x['ID']}}"" class = "grid">
                     <img class ="h-25 mx-auto" src =" {{ x['Image'] }} ">
                     <br>
-                    {{ x["Name"] }} <br>
-                    ${{ x["Price"] }}
+                    <div>{{ x["Name"] }}</div> <br>
+                    <div>${{ x["Price"] }}</div>
                 </div>
             {% endfor %}
         </main>
