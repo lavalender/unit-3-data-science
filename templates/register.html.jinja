@@ -7,6 +7,9 @@
   </head>
     <body>
     {% include "components/navbar.html.jinja" %}
+    {%for message in get_flashed_messages()%}
+        <li>{{message}}</li>
+    {% endfor %}
     </body>
 </html>
 
@@ -18,56 +21,59 @@
         <div class="relative flex flex-wrap">
             <div class="w-full relative">
                 <div class="md:mt-6">
-                    <div class="text-center font-semibold text-black">
-                        Lorem ipsum dolor
+                    <div class="text-center font-bold text-black">
+                        Register
                     </div>
-                    <div class="text-center font-base text-black">
-                        Sed ut perspiciatis unde?
-                    </div>
-                    <form class="mt-8" x-data="{password: '',password_confirm: ''}">
+                    <form method="post" class="mt-8" x-data="{password: '',confirm_password: ''}">
                         <div class="mx-auto max-w-lg ">
                             <div class="py-1">
-                                <span class="px-1 text-sm text-gray-600">Username</span>
-                                <input placeholder="" type="text"
+                                <span class="px-1 text-sm text-gray-600">Name</span>
+                                <input name ="name" placeholder="" required type="text"
                                        class="text-md block px-3 py-2 rounded-lg w-full
                 bg-white border-2 border-gray-300 placeholder-gray-600 shadow-md focus:placeholder-gray-500 focus:bg-white focus:border-gray-600 focus:outline-none">
                             </div>
                             <div class="py-1">
                                 <span class="px-1 text-sm text-gray-600">Email</span>
-                                <input placeholder="" type="email"
+                                <input name="email" placeholder="" required type="email"
                                        class="text-md block px-3 py-2 rounded-lg w-full
                 bg-white border-2 border-gray-300 placeholder-gray-600 shadow-md focus:placeholder-gray-500 focus:bg-white focus:border-gray-600 focus:outline-none">
                             </div>
                             <div class="py-1">
                                 <span class="px-1 text-sm text-gray-600">Password</span>
-                                <input placeholder="" type="password" x-model="password"
+                                <input name="password" placeholder="" type="password" x-model="password"
                                        class="text-md block px-3 py-2 rounded-lg w-full
                 bg-white border-2 border-gray-300 placeholder-gray-600 shadow-md focus:placeholder-gray-500 focus:bg-white focus:border-gray-600 focus:outline-none">
                             </div>
                             <div class="py-1">
                                 <span class="px-1 text-sm text-gray-600">Password Confirm</span>
-                                <input placeholder="" type="password" x-model="password_confirm"
+                                <input name="confirm_password" placeholder="" required type="password" x-model="confirm_password"
+                                       class="text-md block px-3 py-2 rounded-lg w-full
+                bg-white border-2 border-gray-300 placeholder-gray-600 shadow-md focus:placeholder-gray-500 focus:bg-white focus:border-gray-600 focus:outline-none">
+                            </div>
+                            <div class="py-1">
+                                <span class="px-1 text-sm text-gray-600">Address</span>
+                                <input name="address" placeholder="" required type="address"
                                        class="text-md block px-3 py-2 rounded-lg w-full
                 bg-white border-2 border-gray-300 placeholder-gray-600 shadow-md focus:placeholder-gray-500 focus:bg-white focus:border-gray-600 focus:outline-none">
                             </div>
                             <div class="flex justify-start mt-3 ml-4 p-1">
                                 <ul>
                                     <li class="flex items-center py-1">
-                                        <div :class="{'bg-green-200 text-green-700': password == password_confirm && password.length > 0, 'bg-red-200 text-red-700':password != password_confirm || password.length == 0}"
+                                        <div :class="{'bg-green-200 text-green-700': password == confirm_password && password.length > 0, 'bg-red-200 text-red-700':password != confirm_password || password.length == 0}"
                                              class=" rounded-full p-1 fill-current ">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path x-show="password == password_confirm && password.length > 0" stroke-linecap="round"
+                                                <path x-show="password == confirm_password && password.length > 0" stroke-linecap="round"
                                                       stroke-linejoin="round" stroke-width="2"
                                                       d="M5 13l4 4L19 7"/>
-                                                <path x-show="password != password_confirm || password.length == 0" stroke-linecap="round"
+                                                <path x-show="password != confirm_password || password.length == 0" stroke-linecap="round"
                                                       stroke-linejoin="round" stroke-width="2"
                                                       d="M6 18L18 6M6 6l12 12"/>
 
                                             </svg>
                                         </div>
-                                        <span :class="{'text-green-700': password == password_confirm && password.length > 0, 'text-red-700':password != password_confirm || password.length == 0}"
+                                        <span :class="{'text-green-700': password == confirm_password && password.length > 0, 'text-red-700':password != confirm_password || password.length == 0}"
                                               class="font-medium text-sm ml-3"
-                                              x-text="password == password_confirm && password.length > 0 ? 'Passwords match' : 'Passwords do not match' "></span>
+                                              x-text="password == confirm_password && password.length > 0 ? 'Passwords match' : 'Passwords do not match' "></span>
                                     </li>
                                     <li class="flex items-center py-1">
                                         <div :class="{'bg-green-200 text-green-700': password.length > 7, 'bg-red-200 text-red-700':password.length < 7 }"

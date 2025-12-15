@@ -1,18 +1,19 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, flash, redirect
 
 import pymysql
 
 from dynaconf import Dynaconf
 
+config = Dynaconf(setting_file = ["settings.toml"])
 
 app = Flask(__name__)
 
-config = Dynaconf(settings_file=["settings.toml"])
+app.secret_key = config.secret_key
 
 def connect_db():
     conn = pymysql.connect(
         host="db.steamcenter.tech",
-        user="cogboe",
+        user="vburke",
         password=config.password,
         database="vburke_garlique_gourmet",
         autocommit= True,
@@ -47,6 +48,22 @@ def product_page(product_id):
 def login():
     return render_template('login.html.jinja')
 
-@app.route('/register')
+@app.route('/register', methods= ["POST", "GET"])
 def register():
+    if request.method == "POST":
+        name = request.form["name"]
+        email = request.form["email"]
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+        address = request.form["address"]
+        if password != confirm_password:
+            flash("Passwords do not match")
+        else:
+            connection = connect_db()
+            cursor = connection.cursor()
+            cursor.execute("""
+                INSERT INTO `User` (`Name`, `Password`, `Email`, `Address`)
+                VALUES (%s, %s, %s, %s)
+            """, (name, password, email, address))
+            return redirect('/login')
     return render_template('register.html.jinja')
