@@ -5,7 +5,6 @@
     <a class="text-3xl font-bold" href="#">
       Logo Here.
     </a>
-
     <!-- Desktop Navigation -->
     <ul class="hidden md:flex space-x-12 font-semibold">
       <li><a class="hover:text-gray-300" href="#">Home</a></li>
@@ -60,26 +59,31 @@
       </a>
 
       <!-- PROFILE ICON → LOGIN / REGISTER DROPDOWN -->
-      <div class="relative group">
-        <button class="hover:text-gray-200 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 
-                     3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </button>
+     
+      {%if not current_user.is_athenticated%}
+        <div class="relative group">
+          <button class="hover:text-gray-200 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 
+                      3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
 
-        <!-- DROPDOWN MENU -->
-        <ul class="absolute right-0 mt-2 w-32 bg-gray-800 border border-gray-700 rounded-md 
-                   opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                   transition-all duration-200 text-white">
-          <li><a href="/login" class="block px-4 py-2 hover:bg-gray-700">Sign In</a></li>
-          <li><a href="/register" class="block px-4 py-2 hover:bg-gray-700">Register</a></li>
-        </ul>
-      </div>
+            <ul class="absolute right-0 mt-2 w-32 bg-gray-800 border border-gray-700 rounded-md 
+                      opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+                      transition-all duration-200 text-white">
+              <li><a href="/login" class="block px-4 py-2 hover:bg-gray-700">Sign In</a></li>
+              <li><a href="/register" class="block px-4 py-2 hover:bg-gray-700">Register</a></li>
+            </ul>
+          </div>
+          <div>
+            Hi, {{current_user.name}}
+          </div>
 
-    </div>
+        </div>
+      {% endif %}
 
     <!-- Mobile Menu Button -->
     <button id="mobile-btn" class="md:hidden">

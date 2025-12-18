@@ -1,14 +1,45 @@
-from flask import Flask, render_template, request, flash, redirect
+from flask import Flask, render_template, request, flash, redirect, abort, render_template
+from flask_login import LoginManager, login_user, login_required, logout_user
 
 import pymysql
 
 from dynaconf import Dynaconf
 
-config = Dynaconf(setting_file = ["settings.toml"])
+config = Dynaconf(settings_file = ["settings.toml"])
 
 app = Flask(__name__)
 
 app.secret_key = config.secret_key
+
+login_manager = LoginManager( app )
+
+login_manager.login_view = '/login'
+class User:
+    is_authenticated = True
+    is_active = True
+    is_anonymous = False
+
+    def __init__(self, result):
+        self.name = result['Name']
+        self.email = result['Email']
+        self.address = result['Address']
+        self.id = result['ID']
+    
+    def get_id(self):
+        return str(self.id)
+
+@login_manager.user_loader
+def load_user(user_id):
+    connection = connect_db()
+    cursor = connection.cursor()
+    cursor. execute("SELECT * FROM `User` WHERE `ID` = %s " , (user_id))
+    result = cursor.fetchone()
+    connection.close()
+    if result is None:
+        return None
+    return User(result)
+
+    
 
 def connect_db():
     conn = pymysql.connect(
@@ -17,7 +48,7 @@ def connect_db():
         password=config.password,
         database="vburke_garlique_gourmet",
         autocommit= True,
-        cursoorclass= pymysql.cursors.DictCursor
+        cursorclass= pymysql.cursors.DictCursor
     )
     return conn
 
@@ -30,8 +61,8 @@ def index():
 def browse():
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM `Product` WHERE `ID` = %s", ( product_id ))
-    result = cursor.fetchone()
+    cursor.execute("SELECT * FROM `Product`")
+    result = cursor.fetchall()
     connection.close()
     return render_template("browse.html.jinja", product=result)
 
@@ -39,14 +70,14 @@ def browse():
 def product_page(product_id):
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM `Product`")
-    result = cursor.fetchall()
+    cursor.execute("SELECT * FROM `Product` WHERE `ID` = %s", ( product_id ))
+    result = cursor.fetchone()
     connection.close()
+    if result is None:
+        abort(404)
     return render_template("product.html.jinja", product=result)
 
-@app.route('/login')
-def login():
-    return render_template('login.html.jinja')
+
 
 @app.route('/register', methods= ["POST", "GET"])
 def register():
@@ -61,9 +92,45 @@ def register():
         else:
             connection = connect_db()
             cursor = connection.cursor()
-            cursor.execute("""
-                INSERT INTO `User` (`Name`, `Password`, `Email`, `Address`)
-                VALUES (%s, %s, %s, %s)
-            """, (name, password, email, address))
-            return redirect('/login')
+            try:
+                cursor.execute("""
+                    INSERT INTO `User` (`Name`, `Password`, `Email`, `Address`)
+                    VALUES (%s, %s, %s, %s)
+                """, (name, password, email, address))
+                connection.close()
+            except pymysql.err.IntegrityError:
+                flash("User with thsat email already exists")
+                connection.close()
+            else:
+                return redirect('/login')
     return render_template('register.html.jinja')
+
+@app.route("/login", methods = ["POST", "GET"])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        connection = connect_db()
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM `User` WHERE `Email` = %s" , (email) )
+        result = cursor.fetchone()
+        connection.close()
+        if result is None:
+            flash("No user found")
+        elif password != result["Password"]:
+            flash("Incorrect password")
+        else:
+            login_user(User(result))
+            return redirect('/browse')
+    return render_template("login.html.jinja")
+
+@app.route("/logout",  methods = ["POST", "GET"])
+@login_required
+def logout():
+    logout_user()
+    flash("You Have Been Logged Out! Thanks For Shopping")
+    return redirect("/login")
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template("/404")
