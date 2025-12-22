@@ -80,11 +80,16 @@ def product_page(product_id):
 @app.route("/product/<product_id>/add_to_cart", methods=["POST"])
 @login_required
 def add_to_cart(product_id):
+    quantity = request.form["qty"]
     connection = connect_db
     cursor = connection.cursor()
-    cursor.execute("""INSERT INTO `Cart` (`Quantity`, `ProductID`, `UserID`)""")
-    connection.close
-    return redirect('/cart')
+    cursor.execute("""INSERT INTO `Cart` (`Quantity`, `ProductID`, `UserID` VALUES(%s, %s, %s)
+    ON DUPLICATE KEY UPDATE
+    Quantity + %s
+ """, (quantity, product_id, current_user.id, quantity))
+  
+
+
     
 
 
@@ -143,3 +148,18 @@ def logout():
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template("/404")
+
+@app.route("/cart",  methods = ["POST", "GET"])
+@login_required
+def cart():
+    connection = connect_db
+    cursor = connection.cursor()
+    cursor.execute("""
+                   SELECT * FROM `Cart`
+                   JOIN `Product` ON `Product`. `ID` = `Cart` . `ProductID`
+                   WHERE `UserID` = %s
+                   """, (current_user.id))
+    results = cursor.fetchall()
+
+    connection.close()
+    return render_template("cart.html.jinja", cart = results)
