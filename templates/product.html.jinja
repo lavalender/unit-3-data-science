@@ -6,109 +6,94 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
     <body>
-    {% include "components/navbar.html.jinja" %}
-    <h1>{{product['Name']}}</h1>
-      <form method="post" action="/product/{{product['ID']}}/add_to_cart">
-        <label>Qty:</label>
-        <input type="number" name="qty" value="1" min="1" max="5">
-        <button class>
-        Add to Cart
-        </button>
-      </form>
-<!-- component -->
-<div class="flex flex-col md:flex-row w-screen h-full px-14 py-7 bg-gradient-to-r from-blue-100 to-purple-100">
+        {% include "components/navbar.html.jinja"%}
 
-    <!-- My Cart -->
-    <div class="w-full flex flex-col h-fit gap-4 p-6 bg-white rounded-lg shadow-lg">
-        <p class="text-blue-900 text-2xl font-bold">🛒 My Cart</p>
+        <div class="flex flex-row gap-10">
 
-        <!-- Product -->
-        <div class="flex flex-col p-5 text-lg font-semibold bg-blue-50 shadow-md border rounded-lg hover:shadow-xl transition-all duration-300">
-            <div class="flex flex-col md:flex-row gap-4 justify-between">
-                <!-- Product Information -->
-                <div class="flex flex-row gap-6 items-center">
-                    <div class="w-24 h-24 rounded-lg overflow-hidden border-2 border-blue-200">
-                        <img class="w-full h-full object-cover" src="https://static.netshoes.com.br/produtos/tenis-adidas-coreracer-masculino/09/NQQ-4635-309/NQQ-4635-309_zoom1.jpg?ts=1675445414&ims=544x">
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <p class="text-lg text-gray-800 font-semibold">Adidas Coreracer Men's Shoes</p>
-                        <p class="text-xs text-gray-600 font-medium">Color: <span class="font-normal">Black + Zinc</span></p>
-                        <p class="text-xs text-gray-600 font-medium">Size: <span class="font-normal">42</span></p>
-                    </div>
+            <!--The products, the Description, the price and the cart at the top-->
+            <div class="flex flex-row gap-8 p-5 mt-10 ">
+                <!-- Left: Product Image-->
+                <div class="w-150 aspect-square overflow-hidden rounded-lg">
+                    <img 
+                        src= "{{ product ['Image'] }}" 
+                        alt= "{{ product ['Name'] }}"
+                        class="w-full h-full object-cover"
+                        >
                 </div>
-                <!-- Price Information -->
-                <div class="self-center text-center">
-                    <p class="text-gray-600 font-normal text-sm line-through">$99.99
-                        <span class="text-emerald-500 ml-2">(-50% OFF)</span>
-                    </p>
-                    <p class="text-gray-800 font-normal text-xl">$49.99</p>
-                </div>
-                <!-- Remove Product Icon -->
-                <div class="self-center">
-                    <button class="p-1 hover:bg-gray-100 rounded-full transition-colors">
-                        <svg class="w-6 h-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M400,113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1,64,192,77.1,192,93.3v20h-80V128h21.1l23.6,290.7   c0,16.2,13.1,29.3,29.3,29.3h141c16.2,0,29.3-13.1,29.3-29.3L379.6,128H400V113.3z M206.6,93.3c0-8.1,6.6-14.7,14.6-14.7h69.5   c8.1,0,14.6,6.6,14.6,14.7v20h-98.7V93.3z M341.6,417.9l0,0.4v0.4c0,8.1-6.6,14.7-14.6,14.7H186c-8.1,0-14.6-6.6-14.6-14.7v-0.4   l0-0.4L147.7,128h217.2L341.6,417.9z"/>
-                        <g>
-                            <rect height="241" width="14" x="249" y="160"/>
-                            <polygon points="320,160 305.4,160 294.7,401 309.3,401"/>
-                            <polygon points="206.5,160 192,160 202.7,401 217.3,401"/>
-                        </g>
-                    </svg>
-                    <span class="text-red-500 text-xs">Remove</span>
-                </button>
+
+                <!--Right: Product Info-->
+                <div class="flex flex-col gap-6 max-w-xl">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 leading-snug">{{product["Name"]}}</h1>
+                    </div>
+
+                    <p class="text-gray-600 text-lg font-bold"> ${{ product["Price"]}}</p>
+
+                    <form method="post" action="/product/{{product['ID']}}/add_to_cart" >
+                        <label>Quantity:</label>
+                        <input type="number" name="quantity" value="1" min="1" max="20" class="w-15">
+                            
+
+                        <button class="bg-red-2-500 ">Add to cart</button>
+                    </form>
+
+
+                    <div class="bg-gray-500 rounded-xl shadow p-4">
+                        <p class="font-bold text-2xl mb-1">Description</p>
+                        <p class="text-gray-700">
+                            {{ product["Description"] [150:]}}
+                            {% if product["Description"]| length > 150 %}
+                                <span id="dots">...</span>
+                                <span id="more" class="hidden">
+                                    {{product["Description"] [150:]}}
+                                </span>
+                            {%endif%}
+                        </p>
+                    </div>
                 </div>
             </div>
-            <!-- Product Quantity -->
-            <div class="flex flex-row self-center gap-2 items-center">
-                <button class="w-7 h-7 rounded-full bg-pink-200 hover:bg-pink-300 transition-colors text-xl font-bold text-gray-700">
-                    -
-                </button>
-                <input type="text" readonly="readonly" value="1" class="w-8 h-8 text-center text-gray-900 text-sm outline-none border border-gray-300 rounded-lg">
-                <button class="w-7 h-7 rounded-full bg-pink-200 hover:bg-pink-300 transition-colors text-xl font-bold text-gray-700">
-                    +
-                </button>
-            </div>
+
         </div>
+            <!--Similar Products-->
+    <div class="px-8 py-10 max-w-6xl mx-auto">
+
+        <div class="flex items-center my-10">
+            <div class="flex-1 border-t border-gray-300"></div>
+
+            <h1 class="px-4 text-3xl font-bold text-center text-gray-800">
+                Similar Products
+            </h1>
+
+            <div class="flex-1 border-t border-gray-300"></div>
+        </div>
+
+
+        {% if products and products|length > 0 %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for item in products %}
+            <a href="/product/{{ item['ID'] }}"
+                class="block bg-white shadow-md rounded-xl p-4 hover:shadow-xl transition duration-300">
+
+                <img src="{{ item['Image'] }}" alt="{{ item['Name'] }}"
+                    class="w-full h-48 object-cover rounded-lg mb-3">
+
+                <h3 class="text-lg font-semibold mb-1">
+                    {{ item['Name'] }}
+                </h3>
+
+                <p class="text-gray-700 font-medium">
+                    ${{ item['Price'] }}
+                </p>
+            </a>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <p class="text-gray-600">No similar products available.</p>
+        {% endif %}
+
     </div>
 
-    <!-- Purchase Resume -->
-    <div class="flex flex-col w-full md:w-2/3 h-fit gap-4 p-6 bg-white rounded-lg shadow-lg">
-        <p class="text-blue-900 text-2xl font-bold">💳 Purchase Resume</p>
-        <div class="flex flex-col p-5 gap-4 text-lg font-semibold bg-blue-50 shadow-md border rounded-lg">
-            <div class="flex flex-row justify-between">
-                <p class="text-gray-600">Subtotal (2 Items)</p>
-                <p class="text-end font-bold">$99.98</p>
-            </div>
-            <hr class="bg-gray-200 h-0.5">
-            <div class="flex flex-row justify-between">
-                <p class="text-gray-600">Freight</p>
-                <div>
-                    <p class="text-end font-bold">$3.90</p>
-                    <p class="text-gray-600 text-sm font-normal">Arrives on Jul 16</p>
-                </div>
-            </div>
-            <hr class="bg-gray-200 h-0.5">
-            <div class="flex flex-row justify-between">
-                <p class="text-gray-600">Discount Coupon</p>
-                <a class="text-gray-500 text-base underline" href="#">Add</a>
-            </div>
-            <hr class="bg-gray-200 h-0.5">
-            <div class="flex flex-row justify-between">
-                <p class="text-gray-600">Total</p>
-                <div>
-                    <p class="text-end font-bold text-blue-600">$103.88</p>
-                </div>
-            </div>
-            <div class="flex gap-2">
-                <button class="transition-colors text-sm bg-pink-600 hover:bg-pink-700 p-3 rounded-full w-full text-white shadow-md">
-                    FINISH
-                </button>
-                <button class="transition-colors text-sm bg-white border-2 border-pink-500 p-3 rounded-full w-full text-pink-500 shadow-md">
-                    ADD MORE PRODUCTS
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-  </body>
+
+    </body>
 </html>
-

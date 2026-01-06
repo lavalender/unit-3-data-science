@@ -64,7 +64,25 @@ def browse():
     cursor.execute("SELECT * FROM `Product`")
     result = cursor.fetchall()
     connection.close()
-    return render_template("browse.html.jinja", product=result)
+    return render_template("browse.html.jinja", products=result)
+
+@app.route("/lunch")
+def lunch():
+    connection = connect_db()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM `Product`")
+    result = cursor.fetchall()
+    connection.close()
+    return render_template("lunch.html.jinja", products=result)
+
+@app.route("/dinner")
+def dinner():
+    connection = connect_db()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM `Product`")
+    result = cursor.fetchall()
+    connection.close()
+    return render_template("dinner.html.jinja", products=result)
 
 @app.route("/product/<product_id>")
 def product_page(product_id):
@@ -75,7 +93,7 @@ def product_page(product_id):
     connection.close()
     if result is None:
         abort(404)
-    return render_template("product.html.jinja", product=result)
+    return render_template("product.html.jinja", products=result)
 
 @app.route("/product/<product_id>/add_to_cart", methods=["POST"])
 @login_required
@@ -87,10 +105,13 @@ def add_to_cart(product_id):
     ON DUPLICATE KEY UPDATE
     Quantity + %s
  """, (quantity, product_id, current_user.id, quantity))
-  
-
-
     
+    result = cursor.fetchone()
+
+    connection.close()
+  
+    return redirect('/cart')
+
 
 
 @app.route('/register', methods= ["POST", "GET"])
@@ -147,7 +168,7 @@ def logout():
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template("/404")
+    return render_template("404.html.jinja")
 
 @app.route("/cart",  methods = ["POST", "GET"])
 @login_required
@@ -163,3 +184,22 @@ def cart():
 
     connection.close()
     return render_template("cart.html.jinja", cart = results)
+
+@app.route("/cart/<product_id>/update_qty",methods=["POST"])
+@login_required
+def update_cart(product_id):
+    new_qty = request.form["qty"]
+    connection = connect_db
+    cursor = connection.cursor()
+    cursor.execute("""
+        UPDATE `Cart`
+        SET `Quantity`
+        WHERE `ProductID` = %s AND `UserID` = %s
+    """, (new_qty, product_id, current_user.id) )
+
+    connection.close()
+
+    if len(cart.products) == 0:
+        flash("Your cart is empty")
+
+
