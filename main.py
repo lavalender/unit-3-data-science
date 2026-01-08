@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, flash, redirect, abort, render_template
-from flask_login import LoginManager, login_user, login_required, logout_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 import pymysql
 
@@ -173,7 +173,7 @@ def page_not_found(error):
 @app.route("/cart",  methods = ["POST", "GET"])
 @login_required
 def cart():
-    connection = connect_db
+    connection = connect_db()
     cursor = connection.cursor()
     cursor.execute("""
                    SELECT * FROM `Cart`
@@ -183,7 +183,11 @@ def cart():
     results = cursor.fetchall()
 
     connection.close()
-    return render_template("cart.html.jinja", cart = results)
+    total = 0
+    for item in results:
+        total = total + item["Price"] * item["Quantity"]
+    
+    return render_template("cart.html.jinja", cart=results, total=total)
 
 @app.route("/cart/<product_id>/update_qty",methods=["POST"])
 @login_required
@@ -203,3 +207,58 @@ def update_cart(product_id):
         flash("Your cart is empty")
 
 
+@app.route("/checkout",  methods = ["POST", "GET"])
+@login_required
+def checkout():
+    connection = connect_db
+    cursor = connection.cursor()
+    cursor.execute("""
+                   SELECT * FROM `Cart`
+                   JOIN `Product` ON `Product`. `ID` = `Cart` . `ProductID`
+                   WHERE `UserID` = %s
+                   """, (current_user.id))
+    results = cursor.fetchall()
+    if request.method == 'POST':
+        #create the sale in the database
+        cursor.execute("INSERT INTO `Sale` (`UserID`) VALUES (%s)" , (current_user.id, ))
+        #store products bought
+        sale = cursor.lastrowid
+        for item in results:
+            cursor.execute( """
+                        INSERT INTO `SaleCart` 
+                            (`SaleID`, `ProductID`, `Quantity`)
+                        VALUES
+                           (%s, %s, %s)
+                        """, (sale, item['ProductID'], item['Quantity']) )
+
+
+        #empty cart
+        cursor.execute("DELETE FROM `Cart` WHERE `UserID` = %s", (current_user.id,))
+        #thank you screen 
+        redirect('/thank-you')
+    connection.close()
+    return render_template("checkout.html.jinja", cart = results)
+
+
+@app.route("/product/<int:product_id>")
+def product(product_id):
+    connection = connect_db()
+
+    cursor = connection.cursor()
+
+    cursor.execute(
+        "SELECT * FROM Product WHERE id = %s",
+        (product_id,)
+    )
+
+    product = cursor.fetchone()
+
+    connection.close()
+
+    if not product:
+        return "Product not found", 404
+
+    return render_template(
+        "product.html.jinja",
+        product=product
+    )

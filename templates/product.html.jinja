@@ -1,99 +1,102 @@
 <!doctype html>
 <html>
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  </head>
-    <body>
-        {% include "components/navbar.html.jinja"%}
+</head>
 
-        <div class="flex flex-row gap-10">
+<body>
 
-            <!--The products, the Description, the price and the cart at the top-->
-            <div class="flex flex-row gap-8 p-5 mt-10 ">
-                <!-- Left: Product Image-->
-                <div class="w-150 aspect-square overflow-hidden rounded-lg">
-                    <img 
-                        src= "{{ product ['Image'] }}" 
-                        alt= "{{ product ['Name'] }}"
-                        class="w-full h-full object-cover"
-                        >
-                </div>
+{% include "components/navbar.html.jinja" %}
 
-                <!--Right: Product Info-->
-                <div class="flex flex-col gap-6 max-w-xl">
-                    <div>
-                        <h1 class="text-3xl font-bold text-gray-900 leading-snug">{{product["Name"]}}</h1>
-                    </div>
+<div class="flex flex-row gap-10">
 
-                    <p class="text-gray-600 text-lg font-bold"> ${{ product["Price"]}}</p>
+    <div class="flex flex-row gap-8 p-5 mt-10">
 
-                    <form method="post" action="/product/{{product['ID']}}/add_to_cart" >
-                        <label>Quantity:</label>
-                        <input type="number" name="quantity" value="1" min="1" max="20" class="w-15">
-                            
+        <!-- Left: Product Image -->
+        <div class="w-150 aspect-square overflow-hidden rounded-lg">
+            <img
+                src="{{ product['Image'] }}"
+                alt="{{ product['Name'] }}"
+                class="w-full h-full object-cover">
+        </div>
 
-                        <button class="bg-red-2-500 ">Add to cart</button>
-                    </form>
+        <!-- Right: Product Info -->
+        <div class="flex flex-col gap-6 max-w-xl">
 
+            <h1 class="text-3xl font-bold text-gray-900">
+                {{ product["Name"] }}
+            </h1>
 
-                    <div class="bg-gray-500 rounded-xl shadow p-4">
-                        <p class="font-bold text-2xl mb-1">Description</p>
-                        <p class="text-gray-700">
-                            {{ product["Description"] [150:]}}
-                            {% if product["Description"]| length > 150 %}
-                                <span id="dots">...</span>
-                                <span id="more" class="hidden">
-                                    {{product["Description"] [150:]}}
-                                </span>
-                            {%endif%}
-                        </p>
-                    </div>
-                </div>
+            <p class="text-gray-600 text-lg font-bold">
+                ${{ product["Price"] }}
+            </p>
+
+            <form method="post" action="/product/{{ product['ID'] }}/add_to_cart">
+                <label>Quantity:</label>
+                <input type="number" name="quantity" value="1" min="1" max="20"
+                       class="w-16 border rounded px-1">
+
+                <button class="bg-red-500 text-white px-4 py-2 rounded ml-2">
+                    Add to cart
+                </button>
+            </form>
+
+            <!-- Description -->
+            <div class="bg-gray-100 rounded-xl shadow p-4">
+                <p class="font-bold text-2xl mb-1">Description</p>
+
+                <p class="text-gray-700">
+                    {{ product["Description"][:150] }}
+
+                    {% if product["Description"]|length > 150 %}
+                        <span>...</span>
+                    {% endif %}
+                </p>
             </div>
 
         </div>
-            <!--Similar Products-->
-    <div class="px-8 py-10 max-w-6xl mx-auto">
+    </div>
+</div>
 
-        <div class="flex items-center my-10">
-            <div class="flex-1 border-t border-gray-300"></div>
+<!-- Similar Products -->
+<div class="px-8 py-10 max-w-6xl mx-auto">
 
-            <h1 class="px-4 text-3xl font-bold text-center text-gray-800">
-                Similar Products
-            </h1>
+    <div class="flex items-center my-10">
+        <div class="flex-1 border-t border-gray-300"></div>
 
-            <div class="flex-1 border-t border-gray-300"></div>
-        </div>
+        <h1 class="px-4 text-3xl font-bold text-gray-800">
+            Similar Products
+        </h1>
 
-
-        {% if products and products|length > 0 %}
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {% for item in products %}
-            <a href="/product/{{ item['ID'] }}"
-                class="block bg-white shadow-md rounded-xl p-4 hover:shadow-xl transition duration-300">
-
-                <img src="{{ item['Image'] }}" alt="{{ item['Name'] }}"
-                    class="w-full h-48 object-cover rounded-lg mb-3">
-
-                <h3 class="text-lg font-semibold mb-1">
-                    {{ item['Name'] }}
-                </h3>
-
-                <p class="text-gray-700 font-medium">
-                    ${{ item['Price'] }}
-                </p>
-            </a>
-            {% endfor %}
-        </div>
-
-        {% else %}
-        <p class="text-gray-600">No similar products available.</p>
-        {% endif %}
-
+        <div class="flex-1 border-t border-gray-300"></div>
     </div>
 
+    {% if products %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for item in products %}
+        <a href="/product/{{ item['ID'] }}"
+           class="block bg-white shadow-md rounded-xl p-4 hover:shadow-xl">
 
-    </body>
+            <img src="{{ item['Image'] }}"
+                 alt="{{ item['Name'] }}"
+                 class="w-full h-48 object-cover rounded-lg mb-3">
+
+            <h3 class="text-lg font-semibold">
+                {{ item['Name'] }}
+            </h3>
+
+            <p class="text-gray-700 font-medium">
+                ${{ item['Price'] }}
+            </p>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+        <p>No similar products available.</p>
+    {% endif %}
+</div>
+
+</body>
 </html>

@@ -4,20 +4,79 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Cart</title>
   </head>
-    <body>
+  <body class="bg-gray-100">
+
     {% include "components/navbar.html.jinja" %}
 
-    {%for x in cart()%}
-        <div>{{x['Name']}}</div>
-        <div>
-            <form method="post" action="/cart/{{x['ProductID']}}/update_qty">
-            <input name="qty" type="number" value ="{{x['Quantity']}}">     
-                   
-            </form>
+    <div class="h-screen pt-20">
+      <h1 class="mb-10 text-center text-2xl font-bold">Cart Items</h1>
+
+      <div class="mx-auto max-w-5xl justify-center px-6 md:flex md:space-x-6 xl:px-0">
+
+        <!-- Cart Items -->
+        <div class="rounded-lg md:w-2/3">
+          {% if cart %}
+            {% for x in cart %}
+            <div class="mb-6 rounded-lg bg-white p-6 shadow-md sm:flex sm:justify-start">
+
+              <img src="{{ x['Image'] }}" alt="{{ x['Name'] }}" class="w-full rounded-lg sm:w-40" />
+
+              <div class="sm:ml-4 sm:flex sm:w-full sm:justify-between">
+                <div class="mt-5 sm:mt-0">
+                  <h2 class="text-lg font-bold text-gray-900">{{ x['Name'] }}</h2>
+                  <p class="mt-1 text-xs text-gray-700">${{ "%.2f"|format(x['Price']) }} each</p>
+                </div>
+
+                <div class="mt-4 flex justify-between sm:block sm:space-y-6 sm:space-x-6">
+
+                  <!-- Quantity Update Form -->
+                  <form method="post" action="/cart/{{ x['ProductID'] }}/update_qty" class="flex items-center border-gray-100">
+                    <input name="qty" type="number" min="1" value="{{ x['Quantity'] }}"
+                           class="h-8 w-12 border bg-white text-center text-xs outline-none"
+                           onchange="this.form.submit()" />
+                  </form>
+
+                  <!-- Price & Remove -->
+                  <div class="flex items-center space-x-4">
+                    <p class="text-sm font-medium">${{ "%.2f"|format(x['Price'] * x['Quantity']) }}</p>
+                    <a href="/cart/{{ x['ProductID'] }}/remove" class="text-red-500 hover:text-red-700">✕</a>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-center text-gray-500">Your cart is empty.</p>
+          {% endif %}
         </div>
-        <div>${{x['Price'] * x['Quantity']}}</div>
-        <div>${{x['Price']}}</div>
-    {% endfor %}
-    </body>
+
+        <!-- Total -->
+        <div class="mt-6 h-full rounded-lg border bg-white p-6 shadow-md md:mt-0 md:w-1/3">
+          <div class="mb-2 flex justify-between">
+            <p class="text-gray-700">Total</p>
+            <p class="text-gray-700">${{ "%.2f"|format(total) }}</p>
+          </div>
+          <div class="flex justify-between">
+            <p class="text-gray-700">Shipping</p>
+          </div>
+          <hr class="my-4" />
+          <div class="flex justify-between">
+            <p class="text-lg font-bold">Total</p>
+            <div>
+              <p class="mb-1 text-lg font-bold">${{ "%.2f"|format(total) }}</p>
+              <p class="text-sm text-gray-700">including VAT</p>
+            </div>
+          </div>
+          <button class="mt-6 w-full rounded-md bg-blue-500 py-1.5 font-medium text-blue-50 hover:bg-blue-600">
+            Check out
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </body>
 </html>
