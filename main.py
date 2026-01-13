@@ -98,19 +98,23 @@ def product_page(product_id):
 @app.route("/product/<product_id>/add_to_cart", methods=["POST"])
 @login_required
 def add_to_cart(product_id):
-    quantity = request.form["qty"]
-    connection = connect_db
-    cursor = connection.cursor()
-    cursor.execute("""INSERT INTO `Cart` (`Quantity`, `ProductID`, `UserID` VALUES(%s, %s, %s)
-    ON DUPLICATE KEY UPDATE
-    Quantity + %s
- """, (quantity, product_id, current_user.id, quantity))
-    
-    result = cursor.fetchone()
+    quantity = request.form.get("qty", 1, type=int)
 
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        INSERT INTO Cart (Quantity, ProductID, UserID)
+        VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+        Quantity = Quantity + %s
+    """, (quantity, product_id, current_user.id, quantity))
+
+    connection.commit()
     connection.close()
-  
-    return redirect('/cart')
+
+    return redirect("/cart")
+
 
 
 
@@ -189,28 +193,30 @@ def cart():
     
     return render_template("cart.html.jinja", cart=results, total=total)
 
-@app.route("/cart/<product_id>/update_qty",methods=["POST"])
+@app.route("/cart/<product_id>/update_qty", methods=["POST"])
 @login_required
 def update_cart(product_id):
-    new_qty = request.form["qty"]
-    connection = connect_db
-    cursor = connection.cursor()
-    cursor.execute("""
-        UPDATE `Cart`
-        SET `Quantity`
-        WHERE `ProductID` = %s AND `UserID` = %s
-    """, (new_qty, product_id, current_user.id) )
+    new_qty = request.form.get("qty", type=int)
 
+    connection = connect_db()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        UPDATE Cart
+        SET Quantity = %s
+        WHERE ProductID = %s AND UserID = %s
+    """, (new_qty, product_id, current_user.id))
+
+    connection.commit()
     connection.close()
 
-    if len(cart.products) == 0:
-        flash("Your cart is empty")
+    return redirect("/cart")
 
 
 @app.route("/checkout",  methods = ["POST", "GET"])
 @login_required
 def checkout():
-    connection = connect_db
+    connection = connect_db()
     cursor = connection.cursor()
     cursor.execute("""
                    SELECT * FROM `Cart`
@@ -262,3 +268,26 @@ def product(product_id):
         "product.html.jinja",
         product=product
     )
+
+
+@app.route("/orders",  methods = ["POST", "GET"])
+@login_required
+def orders():
+    connection = connect_db
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT
+            `Sale`.`ID`,
+            `Sale`.`Timestamp`,
+            SUM(`SaleCart`.`Quantity`) AS 'Quantity'
+            SUM(`SaleCart`.`Quantity` * `Product`.`Price`) AS 'Total)
+        FROM `Sale`
+        JOIN `SaleCart` ON `SaleCart`.`SaleID` = `Sale`.`ID`
+        JOIN `Product` ON `Product`.`ID` = `SaleProduct`.`ProductID`
+        WHERE `UserID` = %s
+        GROUP BY `Sale`.`ID`;
+    """, (current_user.id) )
+
+    results = cursor.fetchall()
+    connection.close()
+    return render_template("orders.html.jinja", orders = results)
