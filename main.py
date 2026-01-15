@@ -84,16 +84,6 @@ def dinner():
     connection.close()
     return render_template("dinner.html.jinja", products=result)
 
-@app.route("/product/<product_id>")
-def product_page(product_id):
-    connection = connect_db()
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM `Product` WHERE `ID` = %s", ( product_id ))
-    result = cursor.fetchone()
-    connection.close()
-    if result is None:
-        abort(404)
-    return render_template("product.html.jinja", products=result)
 
 @app.route("/product/<product_id>/add_to_cart", methods=["POST"])
 @login_required
@@ -115,7 +105,43 @@ def add_to_cart(product_id):
 
     return redirect("/cart")
 
+@app.route("/product/<product_id>/review", methods=["POST"])
+@login_required
+def addreview(product_id):
+    rating = request.form["rating"]
+    comments = request.form["comment"]
+    connection = connect_db()
+    cursor = connection.cursor()
+    cursor.execute("""
+          INSERT INTO `Review`
+                   (`Rating`, `Comments`, `UserID`, `ProductID`)
+            VALUES
+                   (%s, %s, %s, %s)          
+    """, (rating, comments, current_user.id, product_id))
+    connection.close()
+    return redirect(f"/product/{product_id}")
 
+@app.route("/product/<product_id>")
+def product(product_id):        
+    connection = connect_db()
+
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM Product WHERE ID = %s", (product_id) )
+
+    result = cursor.fetchone()
+
+    cursor.execute("""
+      SELECT * FROM Review 
+      JOIN User ON User.ID = Review.UserID
+      WHERE ProductID = %s
+      """, (product_id)) 
+    
+    reviews = cursor.fetchall()
+    
+    connection.close()
+
+    return render_template("product.html.jinja", product=result, reviews=reviews)
 
 
 @app.route('/register', methods= ["POST", "GET"])
@@ -245,29 +271,6 @@ def checkout():
     connection.close()
     return render_template("checkout.html.jinja", cart = results)
 
-
-@app.route("/product/<int:product_id>")
-def product(product_id):
-    connection = connect_db()
-
-    cursor = connection.cursor()
-
-    cursor.execute(
-        "SELECT * FROM Product WHERE id = %s",
-        (product_id,)
-    )
-
-    product = cursor.fetchone()
-
-    connection.close()
-
-    if not product:
-        return "Product not found", 404
-
-    return render_template(
-        "product.html.jinja",
-        product=product
-    )
 
 
 @app.route("/orders",  methods = ["POST", "GET"])
