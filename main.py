@@ -70,7 +70,9 @@ def browse():
 def lunch():
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM `Product`")
+    cursor.execute("SELECT * FROM `Product` WHERE category = %s",
+        ("lunch",)
+    )
     result = cursor.fetchall()
     connection.close()
     return render_template("lunch.html.jinja", products=result)
@@ -79,10 +81,23 @@ def lunch():
 def dinner():
     connection = connect_db()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM `Product`")
+    cursor.execute("SELECT * FROM `Product` WHERE category = %s",
+        ("dinner",)
+    )
     result = cursor.fetchall()
     connection.close()
     return render_template("dinner.html.jinja", products=result)
+
+@app.route("/appetizer")
+def appetizer():
+    connection = connect_db()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM `Product` WHERE category = %s",
+        ("appetizer",)
+    )
+    result = cursor.fetchall()
+    connection.close()
+    return render_template("appetizer.html.jinja", products=result)
 
 
 @app.route("/product/<product_id>/add_to_cart", methods=["POST"])

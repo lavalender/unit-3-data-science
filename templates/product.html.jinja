@@ -48,11 +48,7 @@
                 <p class="font-bold text-2xl mb-1">Description</p>
 
                 <p class="text-gray-700">
-                    {{ product["Description"][:150] }}
-
-                    {% if product["Description"]|length > 150 %}
-                        <span>...</span>
-                    {% endif %}
+                    {{ product["Description"] }}
                 </p>
             </div>
 
@@ -122,43 +118,41 @@
 </div>
 
     <div class="py-12 px-4 max-w-4xl mx-auto">
-        <h2 class="text-3xl font-semibold text-gray-800 dark:text-white mb-8">
+        <h2 class="text-3xl font-semibold text-gray-800 mb-8">
             Reviews
         </h2>
 
         {% for review in reviews %}
-        <div class="bg-gray-50 dark:bg-gray-800 p-6 mb-6 rounded-lg">
-            
-            <!-- Title + Rating -->
-            <div class="flex justify-between items-center">
-                <h3 class="text-xl font-medium text-gray-800 dark:text-white">
-                    {{ review.title }}
-                </h3>
+        <div class="bg-white p-6 mb-6 rounded-lg shadow">
 
-                <!-- Stars -->
-                <div class="flex text-yellow-400">
-                    {% for i in range(review.rating) %}
-                        ★
-                    {% endfor %}
-                    {% for i in range(5 - review.rating) %}
-                        ☆
-                    {% endfor %}
-                </div>
+            <!-- Author + Time -->
+            <div class="text-sm text-gray-500 mb-2">
+                <span class="font-medium text-gray-700">
+                    {{ review.Name }}
+                </span>
+                • {{ review.Timestamp.strftime("%b %d, %Y • %I:%M %p") }}
             </div>
 
-            <!-- Content -->
-            <p class="mt-3 text-gray-600 dark:text-gray-300">
-                {{ review.content }}
+            <!-- Stars -->
+            <div class="flex text-yellow-400 text-lg mb-3">
+                {% for i in range(review.Rating) %}
+                    ★
+                {% endfor %}
+                {% for i in range(5 - review.Rating) %}
+                    ☆
+                {% endfor %}
+            </div>
+
+            <!-- Comment -->
+            <p class="text-gray-700 leading-relaxed">
+                {{ review.Comments }}
             </p>
 
-            <!-- Author -->
-            <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                {{ review.author }} • {{ review.created_at }}
-            </div>
         </div>
         {% else %}
         <p class="text-gray-500">No reviews yet.</p>
         {% endfor %}
     </div>
+
 </body>
 </html>
